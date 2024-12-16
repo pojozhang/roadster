@@ -61,6 +61,9 @@ def get_limit_up_down_stocks(stock_list, date):
             list.append(stock)
     return list
 
+def get_limit_up_count_df(stock_list, date, days):
+    
+
 list = get_stock_list()
 list = filter_kcb_stocks(list)
 list = filter_new_stocks(list, datetime.datetime.now())

@@ -62,7 +62,13 @@ def get_limit_up_down_stocks(stock_list, date):
     return list
 
 def get_limit_up_count_df(stock_list, date, days):
-    
+    df = pd.DataFrame()
+    datestr = date.strftime("%Y-%m-%d")
+    for stock in stock_list:
+        index = stock.data[(stock.data['日期'] == datestr)].index
+        start_idx = max(0, index - days)
+        count = len(stock.data.iloc[start_idx:index][stock.data.iloc[start_idx:index]['涨跌幅'] >= 10])
+        df[stock.symbol] = count
 
 list = get_stock_list()
 list = filter_kcb_stocks(list)

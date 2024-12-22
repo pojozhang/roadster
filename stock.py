@@ -62,17 +62,31 @@ def get_limit_up_down_stocks(stock_list, date):
     return list
 
 def get_limit_up_count_df(stock_list, date, days):
-    df = pd.DataFrame()
+    stock_limit_count = {}
     datestr = date.strftime("%Y-%m-%d")
     for stock in stock_list:
         index = stock.data[(stock.data['日期'] == datestr)].index
         start_idx = max(0, index - days)
-        count = len(stock.data.iloc[start_idx:index][stock.data.iloc[start_idx:index]['涨跌幅'] >= 10])
-        df[stock.symbol] = count
+        count = stock.data.iloc[start_idx:index][stock.data.iloc[start_idx:index]['涨跌幅'] >= 10].sum()
+        stock_limit_count[stock.symbol] = count
+    return stock_limit_count
+
+def filter_nonconsecutive_limit_up_stock(stock_list, date, days):
+    d = get_limit_up_count_df(stock_list, date, days)
+    filtered_stocks = {}
+    for key, value in d.items():
+        if value < 2:
+            filtered_stocks[key] = value
+    return [stock for stock in stock_list if stock.symbol in filtered_stocks]
+
+def get_relative_position_df(stock_list, date, days):
+
+    return
 
 list = get_stock_list()
 list = filter_kcb_stocks(list)
 list = filter_new_stocks(list, datetime.datetime.now())
 list = filter_st_stock(list)
 list = get_limit_up_down_stocks(list, datetime.datetime.now())
+list = filter_nonconsecutive_limit_up_stock(list, datetime.datetime.now(), 10)
 print(len(list))

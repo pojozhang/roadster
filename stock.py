@@ -62,7 +62,7 @@ def get_limit_up_down_stocks(stock_list, date):
     return list
 
 
-def get_limit_up_count_df(stock_list, date, days):
+def get_limit_up_count(stock_list, date, days):
     stock_limit_count = {}
     datestr = date.strftime("%Y-%m-%d")
     for stock in stock_list:
@@ -74,7 +74,7 @@ def get_limit_up_count_df(stock_list, date, days):
 
 
 def filter_nonconsecutive_limit_up_stock(stock_list, date, days):
-    d = get_limit_up_count_df(stock_list, date, days)
+    d = get_limit_up_count(stock_list, date, days)
     filtered_stocks = {}
     for key, value in d.items():
         if value < 2:
@@ -82,7 +82,7 @@ def filter_nonconsecutive_limit_up_stock(stock_list, date, days):
     return [stock for stock in stock_list if stock.symbol in filtered_stocks]
 
 
-def get_relative_position_df(stock_list, date, days):
+def get_relative_position(stock_list, date, days):
     stock_relative_position = {}
     datestr = date.strftime("%Y-%m-%d")
     for stock in stock_list:
@@ -95,10 +95,17 @@ def get_relative_position_df(stock_list, date, days):
     return stock_relative_position
 
 
+def filter_by_relative_position(stock_list, date, days):
+    rp = get_relative_position(stock_list, date, days)
+    return [stock for stock in stock_list if stock.symbol in rp and rp[stock.symbol] <= 0.5]
+
+def
+
 list = get_stock_list()
 list = filter_kcb_stocks(list)
 list = filter_new_stocks(list, datetime.datetime.now())
 list = filter_st_stock(list)
 list = get_limit_up_down_stocks(list, datetime.datetime.now())
 list = filter_nonconsecutive_limit_up_stock(list, datetime.datetime.now(), 10)
+list = filter_by_relative_position(list, datetime.datetime.now(), 10)
 print(len(list))

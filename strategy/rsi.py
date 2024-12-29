@@ -32,22 +32,24 @@ class SimpleRSIStrategy(bt.Strategy):
             if self.rsi[0] < self.params.rsi_oversold:
                 self.log(f"BUY CREATE: price={self.dataclose[0]}, rsi={self.rsi[0]}")
                 self.buyprice = self.dataclose[0]
-                self.order = self.buy()
+                cash = self.broker.get_cash()*0.5
+                size = int(cash / self.data)
+                self.order = self.buy(size = size)
         else:
             # 止损
             if self.dataclose[0] <= self.buyprice * (1 - self.params.stop_loss_percent):
-                self.order = self.sell()
+                self.order = self.sell(size = self.position.size)
                 self.log(f"SELL CREATE STOP LOSS: price={self.dataclose[0]}, rsi={self.rsi[0]}")
                 return
 
             if self.dataclose[0] >= self.buyprice * (1 + self.params.take_profit_percent):
-                self.order = self.sell()
+                self.order = self.sell(size = self.position.size)
                 self.log(f"SELL CREATE TAKE PROFIT: price={self.dataclose[0]}, rsi={self.rsi[0]}")
                 return
                 # self.sell(exectype=bt.Order.StopTrailLimit, price=self.buyprice * (1 - self.params.stop_loss_percent))
             if self.rsi[0] >= self.params.rsi_overbought:
                 self.log(f"SELL CREATE: price={self.dataclose[0]}, rsi={self.rsi[0]}")
-                self.order = self.sell()
+                self.order = self.sell(size = self.position.size)
 
     def notify_order(self, order):
         if order.status == order.Completed:

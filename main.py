@@ -42,9 +42,9 @@ def trade():
     # )
 
     data = ExtendedCSVData(
-        dataname='doge_usdt_15min_formated.csv',
-        fromdate=datetime.datetime(2023, 1, 1),
-        todate=datetime.datetime(2023, 12, 31),
+        dataname='doge_usdt_30min_formated.csv',
+        fromdate=datetime.datetime(2022, 1, 1),
+        todate=datetime.datetime(2022, 12, 31),
         dtformat=('%Y-%m-%d %H:%M:%S'),
         tmformat=('%H.%M'),
         nullvalue=0.0,

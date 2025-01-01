@@ -5,7 +5,8 @@ import datetime
 # 按 双击 ⇧ 在所有地方搜索类、文件、工具窗口、操作和设置。
 import pandas as pd
 import os as os
-
+# import matplotlib
+# matplotlib.use('TkAgg')
 import backtrader as bt
 import backtrader.feeds as btfeeds
 from strategy.ma import SimpleMAStrategy
@@ -14,6 +15,7 @@ from strategy.rsi import SimpleRSIStrategy
 from strategy.boll import SimpleBollingerStrategy
 from strategy.threema import ThreeMAStrategy
 from data.ext import ExtendedCSVData
+import pyfolio as pf
 
 
 def print_hi(name):
@@ -63,6 +65,7 @@ def trade():
     cerebro = bt.Cerebro()
     cerebro.adddata(data)
     cerebro.addstrategy(SimpleRSIStrategy, stop_loss_percent=0.2,take_profit_percent=0.2)
+
     # cerebro.optstrategy(SimpleAPStrategy,
     #                     stop_loss_percent=[0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.09, 0.1, 0.2, 0.3],
     #                     take_profit_percent=[0.03, 0.04, 0.05, 0.07, 0.09, 0.1, 0.2, 0.3, 0.5, 0.7])
@@ -71,24 +74,40 @@ def trade():
     cerebro.broker.setcash(100000.0)
     cerebro.broker.setcommission(0.001)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    cerebro.addanalyzer(bt.analyzers.PyFolio)
+
     # cerebro.addanalyzer(bt.analyzers.DrawDown, _name="_DrawDown")
     # cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name="_AnnualReturn")
     # cerebro.addanalyzer(bt.analyzers.Returns, _name="_Returns", tann=252, timeframe=bt.TimeFrame.Minutes)
 
     results = cerebro.run()
+
+    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+    strat = results[0]
+
     # for result in results:
     #     for strategy in result:
     #         print(
     #             f'stop_loss_percent: {strategy.params.stop_loss_percent},take_profit_percent: {strategy.params.take_profit_percent}, Final Value: {cerebro.broker.getvalue()}')
     #         print(f"收益率：{strategy.analyzers._Returns.get_analysis()['rtot'] * 100}%")
     #         print(f"最大回撤：{strategy.analyzers._DrawDown.get_analysis()['max']['drawdown']}%")
-    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
-    cerebro.plot(style='candlestick',
-            plotstyle = 'bar',  # 选择绘图样式
-            figscale = 1.5,  # 增大图表比例
-            barup = 'green',  # 上涨 K 线颜色
-            bardown = 'red',  # 下跌 K 线颜色
-            volume = True)
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    # %matplotlib inline
+    # returns = pd.Series(strat.analyzers.returns.get_analysis()['rtot'], index=strat.data.datetime.get())
+    pf.create_full_tear_sheet(
+        returns,
+        # positions=positions,
+        # transactions=transactions,
+        # live_start_date='2022-01-01',  # This date is sample specific
+        )
+    # cerebro.plot(style='candlestick',
+    #         plotstyle = 'bar',  # 选择绘图样式
+    #         figscale = 1.5,  # 增大图表比例
+    #         barup = 'green',  # 上涨 K 线颜色
+    #         bardown = 'red',  # 下跌 K 线颜色
+    #         volume = True)
 
     # 按装订区域中的绿色按钮以运行脚本。
 
@@ -143,5 +162,7 @@ def trade_600845():
 
     # 按装订区域中的绿色按钮以运行脚本。
 
-if __name__ == '__main__':
-    trade()
+# if __name__ == '__main__':
+    # trade()
+
+trade()
